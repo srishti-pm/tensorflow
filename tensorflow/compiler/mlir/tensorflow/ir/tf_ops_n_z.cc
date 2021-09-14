@@ -2451,6 +2451,15 @@ void ToBoolOp::getCanonicalizationPatterns(OwningRewritePatternList &results,
   results.insert<ToBoolOfRankedTensor>(context);
 }
 
+LogicalResult ToBoolOp::inferReturnTypes(
+    MLIRContext *context, Optional<Location> location, ValueRange operands,
+    DictionaryAttr attributes, RegionRange regions,
+    SmallVectorImpl<Type> &inferredReturnTypes) {
+  inferredReturnTypes.push_back(
+      RankedTensorType::get({}, IntegerType::get(context, 1)));
+  return success();
+}
+
 //===----------------------------------------------------------------------===//
 // TransposeOp
 //===----------------------------------------------------------------------===//
@@ -2952,8 +2961,10 @@ LogicalResult WhileOp::verifySymbolUses(SymbolTableCollection &symbol_table) {
   // TODO(jpienaar): Remove.
   if (failed(WhileOpAdaptor(*this).verify(getLoc()))) return failure();
 
-  auto cond_fn = symbol_table.lookupNearestSymbolFrom<FuncOp>(*this, cond());
-  auto body_fn = symbol_table.lookupNearestSymbolFrom<FuncOp>(*this, body());
+  auto cond_fn =
+      symbol_table.lookupNearestSymbolFrom<FuncOp>(*this, condAttr());
+  auto body_fn =
+      symbol_table.lookupNearestSymbolFrom<FuncOp>(*this, bodyAttr());
   if (!cond_fn) {
     return emitOpError("cond refers to an undefined function : ") << cond();
   }

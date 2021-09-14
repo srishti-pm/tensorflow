@@ -1,4 +1,4 @@
-load("@local_config_cuda//cuda:build_defs.bzl", "if_cuda")
+load("@local_config_cuda//cuda:build_defs.bzl", "cuda_library", "if_cuda")
 load("@local_config_rocm//rocm:build_defs.bzl", "if_rocm")
 load(
     "//tensorflow:tensorflow.bzl",
@@ -47,7 +47,6 @@ tf_cuda_library(
         ":cupti_utils",
         "//tensorflow/core:lib",
         "//tensorflow/core:lib_internal",
-        "//tensorflow/core:protos_all_cc",
         "//tensorflow/core/profiler/lib:profiler_factory",
         "//tensorflow/core/profiler/lib:profiler_interface",
         "//tensorflow/core/profiler/protobuf:xplane_proto_cc",
@@ -83,7 +82,6 @@ tf_cuda_cc_test(
         "//tensorflow/core:framework_internal",
         "//tensorflow/core:lib",
         "//tensorflow/core:lib_internal",
-        "//tensorflow/core:protos_all_cc",
         "//tensorflow/core:test",
         "//tensorflow/core:test_main",
         "//tensorflow/core:testlib",
@@ -109,6 +107,26 @@ tf_cuda_library(
         "//tensorflow/core:lib",
         "//tensorflow/core:platform_base",
     ] + tf_additional_cupti_deps(),
+)
+
+cuda_library(
+    name = "cuda_test",
+    testonly = 1,
+    srcs = ["cuda_test.cu.cc"],
+    hdrs = ["cuda_test.h"],
+    copts = select({
+        "@local_config_cuda//cuda:using_nvcc": [
+            "-nvcc_options",
+            "ptxas-options=-v",
+        ],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//tensorflow/core:test",
+        "@local_config_cuda//cuda:cuda_headers",
+        "@local_config_cuda//cuda:cudart",
+    ],
 )
 
 # Rationale for linkstatic: The symbols in libcupti_static.a have hidden
@@ -193,7 +211,6 @@ tf_cuda_library(
         "@com_google_absl//absl/container:node_hash_set",
         "@com_google_absl//absl/strings",
         "//tensorflow/core:lib",
-        "//tensorflow/core:protos_all_cc",
         "//tensorflow/core/profiler/protobuf:xplane_proto_cc",
         "//tensorflow/core/profiler/utils:parse_annotation",
         "//tensorflow/core/profiler/utils:xplane_builder",
@@ -208,7 +225,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//tensorflow/core:lib",
-        "//tensorflow/core:protos_all_cc",
         "//tensorflow/core/profiler/protobuf:xplane_proto_cc",
         "//tensorflow/core/profiler/utils:parse_annotation",
         "//tensorflow/core/profiler/utils:xplane_builder",

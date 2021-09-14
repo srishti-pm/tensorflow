@@ -25,8 +25,8 @@ namespace tensorflow {
 
 namespace {
 
-static string CollectiveKey(OpKernelContext* ctx, int32 group_key,
-                            int32 instance_key) {
+static string CollectiveKey(OpKernelContext* ctx, int32_t group_key,
+                            int32_t instance_key) {
   return strings::StrCat(group_key, ":", instance_key, ":",
                          ctx->frame_iter().frame_id, ":",
                          ctx->frame_iter().iter_id);
@@ -389,7 +389,7 @@ class CollectiveBcastSendOpKernel : public CollectiveOpV1Kernel {
 
 REGISTER_KERNEL_BUILDER(Name("CollectiveBcastSend").Device(DEVICE_CPU),
                         CollectiveBcastSendOpKernel);
-REGISTER_KERNEL_BUILDER(Name("CollectiveBcastSend").Device(DEVICE_GPU),
+REGISTER_KERNEL_BUILDER(Name("CollectiveBcastSend").Device(DEVICE_DEFAULT),
                         CollectiveBcastSendOpKernel);
 
 class CollectiveBcastRecvOpKernel : public CollectiveOpV1Kernel {
@@ -459,7 +459,7 @@ class CollectiveBcastRecvOpKernel : public CollectiveOpV1Kernel {
 
 REGISTER_KERNEL_BUILDER(Name("CollectiveBcastRecv").Device(DEVICE_CPU),
                         CollectiveBcastRecvOpKernel);
-REGISTER_KERNEL_BUILDER(Name("CollectiveBcastRecv").Device(DEVICE_GPU),
+REGISTER_KERNEL_BUILDER(Name("CollectiveBcastRecv").Device(DEVICE_DEFAULT),
                         CollectiveBcastRecvOpKernel);
 
 class CollectiveOpV2Kernel : public AsyncOpKernel {
@@ -637,7 +637,7 @@ class CollectiveReduceV2OpKernel : public CollectiveOpV2Kernel {
 REGISTER_KERNEL_BUILDER(Name("CollectiveReduceV2").Device(DEVICE_CPU),
                         CollectiveReduceV2OpKernel);
 REGISTER_KERNEL_BUILDER(Name("CollectiveReduceV2")
-                            .Device(DEVICE_GPU)
+                            .Device(DEVICE_DEFAULT)
                             .HostMemory("group_size")
                             .HostMemory("group_key")
                             .HostMemory("instance_key"),
@@ -683,7 +683,7 @@ class CollectiveGatherV2OpKernel : public CollectiveOpV2Kernel {
 REGISTER_KERNEL_BUILDER(Name("CollectiveGatherV2").Device(DEVICE_CPU),
                         CollectiveGatherV2OpKernel);
 REGISTER_KERNEL_BUILDER(Name("CollectiveGatherV2")
-                            .Device(DEVICE_GPU)
+                            .Device(DEVICE_DEFAULT)
                             .HostMemory("group_size")
                             .HostMemory("group_key")
                             .HostMemory("instance_key"),
@@ -732,7 +732,7 @@ class CollectiveBcastSendV2OpKernel : public CollectiveOpV2Kernel {
 REGISTER_KERNEL_BUILDER(Name("CollectiveBcastSendV2").Device(DEVICE_CPU),
                         CollectiveBcastSendV2OpKernel);
 REGISTER_KERNEL_BUILDER(Name("CollectiveBcastSendV2")
-                            .Device(DEVICE_GPU)
+                            .Device(DEVICE_DEFAULT)
                             .HostMemory("group_size")
                             .HostMemory("group_key")
                             .HostMemory("instance_key"),
@@ -782,7 +782,7 @@ class CollectiveBcastRecvV2OpKernel : public CollectiveOpV2Kernel {
 REGISTER_KERNEL_BUILDER(Name("CollectiveBcastRecvV2").Device(DEVICE_CPU),
                         CollectiveBcastRecvV2OpKernel);
 REGISTER_KERNEL_BUILDER(Name("CollectiveBcastRecvV2")
-                            .Device(DEVICE_GPU)
+                            .Device(DEVICE_DEFAULT)
                             .HostMemory("group_size")
                             .HostMemory("group_key")
                             .HostMemory("instance_key")

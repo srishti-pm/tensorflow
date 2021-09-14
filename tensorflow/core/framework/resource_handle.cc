@@ -33,6 +33,12 @@ ResourceHandle::ResourceHandle(const ResourceHandleProto& proto) {
 ResourceHandle::~ResourceHandle() {}
 
 void ResourceHandle::AsProto(ResourceHandleProto* proto) const {
+  // TODO(b/197757028): Register the resource with ResourceManager to enable
+  // serialization of ref-counting handles.
+  if (!IsRefCounting()) {
+    LOG(ERROR) << "A ref-counted ResourceHandle cannot be serialized losslessly"
+               << "Deserializing the result is a failure: " << name();
+  }
   proto->set_device(device());
   proto->set_container(container());
   proto->set_name(name());
@@ -109,15 +115,15 @@ Status ResourceHandle::ValidateType(const TypeIndex& type_index) const {
   return Status::OK();
 }
 
-std::atomic<int64> ResourceHandle::current_id_;
+std::atomic<int64_t> ResourceHandle::current_id_;
 
-int64 ResourceHandle::GenerateUniqueId() { return current_id_.fetch_add(1); }
+int64_t ResourceHandle::GenerateUniqueId() { return current_id_.fetch_add(1); }
 
 string ProtoDebugString(const ResourceHandle& handle) {
   return handle.DebugString();
 }
 
-void EncodeResourceHandleList(const ResourceHandle* p, int64 n,
+void EncodeResourceHandleList(const ResourceHandle* p, int64_t n,
                               std::unique_ptr<port::StringListEncoder> e) {
   ResourceHandleProto proto;
   for (int i = 0; i < n; ++i) {
@@ -128,7 +134,7 @@ void EncodeResourceHandleList(const ResourceHandle* p, int64 n,
 }
 
 bool DecodeResourceHandleList(std::unique_ptr<port::StringListDecoder> d,
-                              ResourceHandle* ps, int64 n) {
+                              ResourceHandle* ps, int64_t n) {
   std::vector<uint32> sizes(n);
   if (!d->ReadSizes(&sizes)) return false;
 
